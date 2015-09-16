@@ -1,0 +1,73 @@
+<project name="Jgles2" default="run" basedir=".">
+    <description>
+        ant build/run file
+    </description>
+
+    <target name="jni">
+        <exec executable="make" failonerror="true">
+            <arg line="-f jni/Makefile"/>
+        </exec>
+    </target>
+    
+    <target name="Jgles2" >
+        <fileset dir="Jgles2" includes="**/*.class"/>
+        <javac
+			srcdir="src"
+			classpath="src"
+			includeantruntime="false"
+			debug="on"
+            debuglevel="lines,vars,source">
+            <compilerarg value="-Xlint:all" />
+            <compilerarg value="-Werror" />
+            <!-- maxerrs param must be seperate or space is picked up as a param -->
+            <compilerarg value="-Xmaxerrs" />
+            <compilerarg value="1" />
+        </javac>
+    </target>
+    			
+    <target 
+			name="compileTest"
+			depends="jni,Jgles2"
+			description="compile the test " >
+        <fileset dir="test" includes="**/*.class"/>
+        <javac 
+                srcdir="test"
+                classpath="./Jgles2.jar:."
+                includeantruntime="false"
+                debug="on"
+                debuglevel="lines,vars,source">
+            <compilerarg value="-Xlint:all" />
+            <compilerarg value="-Werror" />
+            <!-- maxerrs param must be seperate or space is picked up as a param -->
+            <compilerarg value="-Xmaxerrs" />
+            <compilerarg value="1" />
+        </javac>
+    </target>
+    
+    <target name="jar" depends="jni">
+		<jar destfile="Jgles2.jar"
+			basedir="src/"
+		/>
+    </target>
+    
+    
+    <target name="run" depends="jar,compileTest">
+        <java
+                fork="true"
+                classname="Main"
+                classpath="Jgles2.jar:test">
+            <sysproperty key="java.library.path" value="."/>
+        </java>
+    </target>        
+    
+    <target name="clean">
+        <delete includeemptydirs="true">
+            <fileset dir="." includes="**/*.class" defaultexcludes="false"/>
+            <fileset dir="src/Jgles2" includes="**/*.class" defaultexcludes="false"/>
+            <fileset dir="." includes="libJgles2.so" defaultexcludes="false"/>
+            <fileset dir="jni" includes="**/*.o" defaultexcludes="false"/>
+            <fileset dir="jni" includes="**/Jgles2_*.h" defaultexcludes="false"/>
+            <fileset dir="." includes="**/*.jar" defaultexcludes="false"/>
+        </delete>
+    </target>
+</project>
