@@ -99,6 +99,7 @@ public final class Main {
 		width=util.getWidth();
 		height=util.getHeight();
 		updateProjection(width,height);
+		System.out.println("width="+width+"  height="+height);
 		glViewport(0, 0, (int)width, (int)height);
             
 
@@ -247,6 +248,8 @@ public final class Main {
         boolean fs=false;
         
         util.captureKeyboard();
+        util.captureMouse();
+        util.setMouseRelative(true);
         /*
          * The "main loop" for our demo
          */ 
@@ -412,6 +415,9 @@ public final class Main {
 					String.format("% .2f", modelRot.z)+", "+
 					String.format("% .2f", modelRot.w)
 			);
+			
+			smlPrint.render(0, 90,"Mouse X="+util.getMouseX());
+			smlPrint.render(0,100,"Mouse Y="+util.getMouseY());
 
 			Print.postRender();
             

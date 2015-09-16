@@ -18,10 +18,11 @@
 #include <linux/input.h>
 
 int __key_fd=-1; 
-
+int __mouse_fd=-1;
 // TODO when someone contributes code for other platforms
 // what to do about key values? java ifdef ???
 bool __keys[256];
+bool __rel_mouse;
 int __mouse[3]; 
 int __width,__height;
 
@@ -112,6 +113,25 @@ static int __dfilter(const struct dirent *d) {
     return 0;
 }
 
+
+JNIEXPORT void JNICALL Java_Jgles2_util_captureMouse
+  (JNIEnv *e, jclass c)
+{
+    __rel_mouse=false;
+
+
+    __mouse_fd = open("/dev/input/mouse0", O_RDONLY);
+    if (__mouse_fd < 0) {
+        printf("opening mouse failed\n");
+    } else {
+        // make none blocking
+        int flags = fcntl(__mouse_fd, F_GETFL);
+        flags |= O_NONBLOCK;
+        fcntl(__mouse_fd, F_SETFL, flags);
+    }
+
+}
+
 JNIEXPORT void JNICALL Java_Jgles2_util_captureKeyboard
   (JNIEnv *e, jclass c)
 {
@@ -138,6 +158,11 @@ JNIEXPORT void JNICALL Java_Jgles2_util_captureKeyboard
 
 }
 
+JNIEXPORT void JNICALL Java_Jgles2_util_setMouseRelative
+  (JNIEnv *e, jclass c, jboolean b)
+{
+	__rel_mouse = b;
+}
 
 JNIEXPORT void JNICALL Java_Jgles2_util_pumpEvents
   (JNIEnv *e, jclass c)
@@ -163,7 +188,35 @@ JNIEXPORT void JNICALL Java_Jgles2_util_pumpEvents
         }
 
     }
+    
+	if (__rel_mouse) { // if we're in relative mode
+        __mouse[0]=0;  // no mouse event should = 0,0
+        __mouse[1]=0;
+    }
+    
+    if(__mouse_fd>0) {
+        signed char mbuf[3];
+        int mres;
+        mres=read(__mouse_fd,&mbuf[0],3);
+        while(mres>=0) {
+            //printf("%i %i %i\n",mbuf[0]&7,mbuf[1],mbuf[2]);
+            __mouse[2]=mbuf[0]&7;
+            if (__rel_mouse) {
+                __mouse[0]=mbuf[1];
+                __mouse[1]=-mbuf[2];
+            } else {
+                __mouse[0]=__mouse[0]+mbuf[1];
+                __mouse[1]=__mouse[1]-mbuf[2];
+                if (__mouse[0]<0) __mouse[0]=0;
+                if (__mouse[1]<0) __mouse[1]=0;
+                if (__mouse[0]>__width) __mouse[0]=__width;
+                if (__mouse[1]>__height) __mouse[1]=__height;
+            }
 
+            mres=read(__mouse_fd,&mbuf[0],3);
+        }
+
+    }
 }
 
 JNIEXPORT jint JNICALL Java_Jgles2_util_getHeight

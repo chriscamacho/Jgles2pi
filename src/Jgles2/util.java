@@ -152,7 +152,8 @@ public class util {
     /** capture input
      */
     public static native void captureKeyboard();
-    
+    public static native void captureMouse();
+    public static native void setMouseRelative(boolean rel);
     /** typically once per "frame" you should run this to ensure that
      * native window events are handled and fed back to the native
      * window handler and thence to your app */
