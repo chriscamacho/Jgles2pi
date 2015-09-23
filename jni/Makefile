@@ -1,16 +1,9 @@
 CC=gcc
 
 JAVA_HOME=`readlink -f /usr/bin/javac | sed "s:bin/javac::"`
-# gentoo is a little less KISS !
-#JAVA_HOME=/usr/lib/jvm/icedtea-7
-
-LIBS=-L/opt/vc/lib/ $(shell pkg-config egl --libs) $(shell pkg-config glesv2 --libs) -lm -lc -lX11 
-
-#CFLAGS = -fPIC `pkg-config egl --cflags` `pkg-config glesv2 --cflags` -I$(JAVA_HOME)/include/ -Ikazmath/
-# iced tea has some additional headers in include/linux
-CFLAGS=-fPIC -I/opt/vc/include/ -I/opt/vc/include/interface/vmcs_host/linux -I$(JAVA_HOME)/include/ -I$(JAVA_HOME)/include/linux $(shell pkg-config egl --cflags)
+LIBS=-L/opt/vc/lib/ -lEGL -lGLESv2 -lm -lc
+CFLAGS=-fPIC -I/opt/vc/include/ -I/opt/vc/include/interface/vcos/pthreads -I/opt/vc/include/interface/vmcs_host/linux -I$(JAVA_HOME)/include/ -I$(JAVA_HOME)/include/linux 
 OBJ = jni/util.o jni/egl.o jni/gles2.o
-
 
 
 libJgles2.so: $(OBJ) jni/Jgles2_util.h jni/Jgles2_util.h jni/Jgles2_GLES2.h
@@ -36,6 +29,3 @@ jni/Jgles2_EGL.h: src/Jgles2/EGL.java
 jni/Jgles2_GLES2.h: src/Jgles2/GLES2.java
 	javac src/Jgles2/GLES2.java
 	javah -d jni -classpath src Jgles2.GLES2
-
-
-
