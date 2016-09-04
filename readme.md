@@ -1,3 +1,6 @@
+This is a one off conversion I did for the PI as I don't have a PI anymore I don't maintain it
+for more upto date code use https://github.com/chriscamacho/Jgles2 which should be easily 
+modified to work on the PI
 
 Jgles2pi
 ------
